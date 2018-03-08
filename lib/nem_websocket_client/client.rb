@@ -148,8 +148,8 @@ module NemWebsocketClient
             data.gsub!("\\\"","\"")
             parser = StompParser::Parser.new
             parser.parse(data) do |frame|
-            if frame.command == "CONNECTED"
-              connected_func.call
+            if frame.command == "CONNECTED" 
+              connected_func.call unless connected_func.nil?
               @is_connected = true
               unless subscribe_stomps.empty?
                 subscribe_stomps.each do |stomp|
