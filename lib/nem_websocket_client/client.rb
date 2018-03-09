@@ -39,8 +39,8 @@ module NemWebsocketClient
         @ws.connected_func = fun
       end
 
-      def heatbeat(&fun)
-        @ws.heatbeat_func = fun
+      def heartbeat(&fun)
+        @ws.heartbeat_func = fun
       end
 
       def errors(&fun)
@@ -143,7 +143,7 @@ module NemWebsocketClient
           end
 
           if msg.data[0] == "h"
-            heatbeat_func.call
+            heartbeat_func.call unless heartbeat_func.nil?
           end
           if msg.data[0] == "a"
             data = msg.data
