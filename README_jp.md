@@ -1,5 +1,6 @@
 # NemWebsocketClient
-NemWebsocketClient is a simple library for handling NEM's Websocket
+[![Build Status](https://travis-ci.org/5hyn3/nem_websocket_client.svg?branch=master)](https://travis-ci.org/5hyn3/nem_websocket_client)
+
 NemWebsocketClientはNEMのWebsocketを扱うためのシンプルなライブラリです。
 ## Installation
 
