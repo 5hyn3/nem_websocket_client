@@ -7,13 +7,13 @@ RSpec.describe NemWebsocketClient::Client do
   it "can connect" do
     EM::run{
       connected = false
-      EM::add_timer 1 do
+      EM::add_timer 0 do
         ws = NemWebsocketClient.connect(host,port)
         ws.connected do
           connected = true
         end
       end
-      EM::add_timer 3 do
+      EM::add_timer 2 do
         expect(connected).to be true
         EM.stop
       end
@@ -23,15 +23,102 @@ RSpec.describe NemWebsocketClient::Client do
   it "get account" do
     EM::run{
       can_get_account = false
-      EM::add_timer 1 do
+      EM::add_timer 0 do
         ws = NemWebsocketClient.connect(host,port)
         ws.subscribe_account(test_address) do |account,address|
           can_get_account = true
         end
         ws.request_account(test_address)
       end
-      EM::add_timer 3 do
+      EM::add_timer 2 do
         expect(can_get_account).to be true
+        EM.stop
+      end
+    }
+  end
+
+  xit "get owned namespace" do
+    EM::run{
+      can_get_owned_namespace = false
+      EM::add_timer 0 do
+        ws = NemWebsocketClient.connect(host,port)
+        ws.subscribe_owned_namespace(test_address) do |account,address|
+          can_get_owned_namespace = true
+        end
+        ws.request_owned_namespace(test_address)
+      end
+      EM::add_timer 2 do
+        expect(can_get_owned_namespace).to be true
+        EM.stop
+      end
+    }
+  end
+
+  it "get owned mosaic" do
+    EM::run{
+      can_get_owned_mosaic = false
+      EM::add_timer 0 do
+        ws = NemWebsocketClient.connect(host,port)
+        ws.subscribe_owned_mosaic(test_address) do |account,address|
+          can_get_owned_mosaic = true
+        end
+        ws.request_owned_mosaic(test_address)
+      end
+      EM::add_timer 2 do
+        expect(can_get_owned_mosaic).to be true
+        EM.stop
+      end
+    }
+  end
+
+  it "get owned mosaic definition" do
+    EM::run{
+      can_get_owned_mosaic_definition = false
+      EM::add_timer 0 do
+        ws = NemWebsocketClient.connect(host,port)
+        ws.subscribe_owned_mosaic_definition(test_address) do |account,address|
+          can_get_owned_mosaic_definition = true
+        end
+        ws.request_owned_mosaic_definition(test_address)
+      end
+      EM::add_timer 2 do
+        expect(can_get_owned_mosaic_definition).to be true
+        EM.stop
+      end
+    }
+  end
+
+  it "get recenttransactions" do
+    EM::run{
+      can_get_recenttransactions = false
+      EM::add_timer 0 do
+        ws = NemWebsocketClient.connect(host,port)
+        ws.subscribe_recenttransactions(test_address) do |account,address|
+          can_get_recenttransactions = true
+        end
+        ws.request_recenttransactions(test_address)
+      end
+      EM::add_timer 2 do
+        expect(can_get_recenttransactions).to be true
+        EM.stop
+      end
+    }
+  end
+
+  it "can close" do
+    EM::run{
+      can_close = false
+      ws = NemWebsocketClient.connect(host,port)
+      EM::add_timer 0 do
+        ws.closed do
+          can_close = true
+        end
+      end
+      EM::add_timer 1 do
+        ws.close
+      end
+      EM::add_timer 3 do
+        expect(can_close).to be true
         EM.stop
       end
     }

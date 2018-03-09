@@ -11,7 +11,7 @@ module NemWebsocketClient
       @@block_height_path = "/blocks/new"
       @@owned_namespace_path = "/account/namespace/owned/"
       @@owned_mosaic_path = "/account/mosaic/owned/"
-      @@ownde_mosaic_definition_path = "/account/mosaic/owned/definition/"
+      @@owned_mosaic_definition_path = "/account/mosaic/owned/definition/"
       @@transaction_path = "/transactions/"
       @@unconfirmed_transaction_path = "/unconfirmed/"
       @@recenttransactions_path = "/recenttransactions/"
@@ -19,7 +19,7 @@ module NemWebsocketClient
 
       @@send_owned_namespace_path = "/w/api/account/namespace/owned"
       @@send_owned_mosaic_path = "/w/api/account/mosaic/owned"
-      @@send_ownde_mosaic_definition_path = "/w/api/account/mosaic/owned/definition"
+      @@send_owned_mosaic_definition_path = "/w/api/account/mosaic/owned/definition"
       @@send_recenttransactions_path = "/w/api/account/transfers/all"
       @@send_account_path = "/w/api/account/get"
 
@@ -71,9 +71,9 @@ module NemWebsocketClient
         send_subscribe_stomp(@@owned_mosaic_path + address)
       end
 
-      def subscribe_ownde_mosaic_definition(address,&fun)
-        @ws.subscribe_ownde_mosaic_definition_func = fun
-        send_subscribe_stomp(@@ownde_mosaic_definition_path + address)
+      def subscribe_owned_mosaic_definition(address,&fun)
+        @ws.subscribe_owned_mosaic_definition_func = fun
+        send_subscribe_stomp(@@owned_mosaic_definition_path + address)
       end
 
       def subscribe_transaction(address,&fun)
@@ -105,11 +105,11 @@ module NemWebsocketClient
       end
 
       def request_owned_mosaic(address)
-        send_send_stomp(@@send_owned_mosaic_path,address,address)
+        send_send_stomp(@@send_owned_mosaic_path,address)
       end
 
-      def request_ownde_mosaic_definition(address)
-        send_send_stomp(@@send_ownde_mosaic_definition_path,address)
+      def request_owned_mosaic_definition(address)
+        send_send_stomp(@@send_owned_mosaic_definition_path,address)
       end
 
       def request_recenttransactions(address)
@@ -123,6 +123,14 @@ module NemWebsocketClient
       def connect
         @ws = WebSocket::Client::Simple.connect(@endpoint)
         ws_init
+        @ws.on :error do |e|
+          errors_func.call(e)
+        end
+        
+        @ws.on :close do |e|
+          closed_func.call(e)
+        end
+
         @ws.on :open do
           connect_header = {"accept-version":"1.1,1.0","heart-beat":"10000,10000"}
           stomp_connect = '["' + StompParser::Frame.new("CONNECT", connect_header,"").to_str + '"]'
@@ -146,7 +154,7 @@ module NemWebsocketClient
             data.gsub!("\\/","\/")
             data.gsub!("\\u0000","\u0000")
             data.gsub!("\\\"","\"")
-            parser = StompParser::Parser.new
+            parser = StompParser::Parser.new(1024 * 100)
             parser.parse(data) do |frame|
             if frame.command == "CONNECTED" 
               connected_func.call unless connected_func.nil?
@@ -165,40 +173,29 @@ module NemWebsocketClient
             if frame.command == "MESSAGE"
               result = JSON.parse(frame.body)
               destination = frame.headers["destination"]
-              if destination == @@block_path
+              address = destination.match(/\w{40}/)
+              destination.slice!(address.to_s) unless address.nil?
+              case destination
+              when @@block_path
                 subscribe_block_func.call(result)
-              elsif destination == @@block_height_path
+              when @@block_height_path
                 subscribe_block_height_func.call(result) 
-              elsif destination.include?(@@unconfirmed_transaction_path)
-                destination.slice!(@@unconfirmed_transaction_path)
-                subscribe_unconfirmed_transaction_func.call(result,destination) 
-              elsif destination.include?(@@recenttransactions_path)
-                destination.slice!(@@recenttransactions_path)
-                subscribe_recenttransactions_func.call(result,destination) 
-              elsif destination.include?(@@account_path)
-                destination.slice!(@@account_path)
-                subscribe_account_func.call(result,destination) 
-              elsif destination.include?(@@owned_namespace_path)
-                destination.slice!(@@owned_namespace_path)
-                subscribe_owned_namespace_func.call(result,destination) 
-              elsif destination.include?(@@owned_mosaic_path)
-                destination.slice!(@@owned_mosaic_path)
-                subscribe_owned_mosaic_func.call(result,destination) 
-              elsif destination.include?(@@ownde_mosaic_definition_path)
-                destination.slice!(@@ownde_mosaic_definition_path)
-                subscribe_owned_mosaic_func.call(result,destination) 
-              elsif destination.include?(@@transaction_path)
-                destination.slice!(@@transaction_path)
-                subscribe_owned_mosaic_func.call(result,destination) 
+              when @@unconfirmed_transaction_path
+                subscribe_unconfirmed_transaction_func.call(result,address) 
+              when @@recenttransactions_path
+                subscribe_recenttransactions_func.call(result,address) 
+              when @@account_path
+                subscribe_account_func.call(result,address) 
+              when @@owned_namespace_path
+                subscribe_owned_namespace_func.call(result,address) 
+              when @@owned_mosaic_path
+                subscribe_owned_mosaic_func.call(result,address) 
+              when @@owned_mosaic_definition_path
+                subscribe_owned_mosaic_definition_func.call(result,address) 
+              when @@transaction_path
+                subscribe_owned_mosaic_func.call(result,address) 
               end
             end
-          end
-
-          @ws.on :error do |e|
-            errors_func.call(e)
-          end
-          @ws.on :close do |e|
-            closed_func.call(e)
           end
         end
       end
@@ -212,7 +209,7 @@ module NemWebsocketClient
         @ws.singleton_class.class_eval{ attr_accessor :subscribe_block_height_func }
         @ws.singleton_class.class_eval{ attr_accessor :subscribe_owned_namespace_func }
         @ws.singleton_class.class_eval{ attr_accessor :subscribe_owned_mosaic_func }
-        @ws.singleton_class.class_eval{ attr_accessor :subscribe_ownde_mosaic_definition_func }
+        @ws.singleton_class.class_eval{ attr_accessor :subscribe_owned_mosaic_definition_func }
         @ws.singleton_class.class_eval{ attr_accessor :subscribe_transaction_func }
         @ws.singleton_class.class_eval{ attr_accessor :subscribe_unconfirmed_transaction_func }
         @ws.singleton_class.class_eval{ attr_accessor :subscribe_recenttransactions_func }
