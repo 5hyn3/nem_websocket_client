@@ -21,7 +21,7 @@ ws.connected do
 end
 
 ws.subscribe_block do |transaction|
-  transaction["timeStamp"]
+  p transaction["timeStamp"]
 end
 
 ws.errors do |e|
