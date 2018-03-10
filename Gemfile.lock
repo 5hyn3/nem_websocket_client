@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    nem_websocket_client (0.1.1)
+    nem_websocket_client (0.1.2)
       stomp_parser (~> 1.0.0)
       websocket-client-simple (~> 0.3.0)
 
