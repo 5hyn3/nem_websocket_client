@@ -6,7 +6,7 @@ NemWebsocketClient is a simple library for handling NEM's Websocket
 ## Installation
 
 ```ruby
-gem 'nem_websocket_client'
+gem install nem_websocket_client
 ```
 
 ## Usage

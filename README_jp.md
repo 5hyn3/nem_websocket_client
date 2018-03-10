@@ -5,7 +5,7 @@ NemWebsocketClientはNEMのWebsocketを扱うためのシンプルなライブ�
 ## Installation
 
 ```ruby
-gem 'nem_websocket_client'
+gem install nem_websocket_client
 ```
 
 ## Usage
