@@ -63,3 +63,12 @@ The gem is available as open source under the terms of the [MIT License](https:/
 ## Code of Conduct
 
 Everyone interacting in the NemWebsocketClient project’s codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/nem_websocket_client/blob/master/CODE_OF_CONDUCT.md).
+
+## Donation
+
+開発者のモチベアップや、他のプロダクトの開発に役立てられます。
+
+NEM
+```
+NCADQWTJUPTSDZ6XEIVIAR7GANIGJENVUAPN3OMD
+```
