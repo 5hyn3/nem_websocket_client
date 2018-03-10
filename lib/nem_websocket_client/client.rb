@@ -62,37 +62,37 @@ module NemWebsocketClient
       end
 
       def subscribe_owned_namespace(address,&fun)
-        @ws.subscribe_owned_namespace_func = fun
+        @ws.subscribe_owned_namespace_func[address] = fun
         send_subscribe_stomp(@@owned_namespace_path + address)
       end
 
       def subscribe_owned_mosaic(address,&fun)
-        @ws.subscribe_owned_mosaic_func = fun
+        @ws.subscribe_owned_mosaic_func[address] = fun
         send_subscribe_stomp(@@owned_mosaic_path + address)
       end
 
       def subscribe_owned_mosaic_definition(address,&fun)
-        @ws.subscribe_owned_mosaic_definition_func = fun
+        @ws.subscribe_owned_mosaic_definition_func[address] = fun
         send_subscribe_stomp(@@owned_mosaic_definition_path + address)
       end
 
       def subscribe_transaction(address,&fun)
-        @ws.subscribe_transaction_func = fun
+        @ws.subscribe_transaction_func[address] = fun
         send_subscribe_stomp(@@transaction_path + address)
       end
 
       def subscribe_unconfirmed_transaction(address,&fun)
-        @ws.subscribe_unconfirmed_transaction_func = fun
+        @ws.subscribe_unconfirmed_transaction_func[address] = fun
         send_subscribe_stomp(@@unconfirmed_transaction_path + address)
       end
 
       def subscribe_recenttransactions(address,&fun)
-        @ws.subscribe_recenttransactions_func = fun
+        @ws.subscribe_recenttransactions_func[address] = fun
         send_subscribe_stomp(@@recenttransactions_path + address)
       end
 
       def subscribe_account(address,&fun)
-        @ws.subscribe_account_func = fun
+        @ws.subscribe_account_func[address] = fun
         send_subscribe_stomp(@@account_path + address)
       end
 
@@ -173,27 +173,28 @@ module NemWebsocketClient
             if frame.command == "MESSAGE"
               result = JSON.parse(frame.body)
               destination = frame.headers["destination"]
-              address = destination.match(/\w{40}/)
-              destination.slice!(address.to_s) unless address.nil?
+              address_match = destination.match(/\w{40}/)
+              address = address_match.to_s
+              destination.slice!(address) unless address.nil?
               case destination
               when @@block_path
                 subscribe_block_func.call(result)
               when @@block_height_path
                 subscribe_block_height_func.call(result) 
               when @@unconfirmed_transaction_path
-                subscribe_unconfirmed_transaction_func.call(result,address) 
+                subscribe_unconfirmed_transaction_func[address].call(result,address) 
               when @@recenttransactions_path
-                subscribe_recenttransactions_func.call(result,address) 
+                subscribe_recenttransactions_func[address].call(result,address) 
               when @@account_path
-                subscribe_account_func.call(result,address) 
+                subscribe_account_func[address].call(result,address) 
               when @@owned_namespace_path
-                subscribe_owned_namespace_func.call(result,address) 
+                subscribe_owned_namespace_func[address].call(result,address) 
               when @@owned_mosaic_path
-                subscribe_owned_mosaic_func.call(result,address) 
+                subscribe_owned_mosaic_func[address].call(result,address) 
               when @@owned_mosaic_definition_path
-                subscribe_owned_mosaic_definition_func.call(result,address) 
+                subscribe_owned_mosaic_definition_func[address].call(result,address) 
               when @@transaction_path
-                subscribe_owned_mosaic_func.call(result,address) 
+                subscribe_owned_mosaic_func[address].call(result,address) 
               end
             end
           end
@@ -220,6 +221,13 @@ module NemWebsocketClient
         @ws.singleton_class.class_eval{ attr_accessor :send_stomps }
         @ws.subscribe_stomps = []
         @ws.send_stomps = []
+        @ws.subscribe_owned_namespace_func = {}
+        @ws.subscribe_owned_mosaic_func = {}
+        @ws.subscribe_owned_mosaic_definition_func = {}
+        @ws.subscribe_transaction_func = {}
+        @ws.subscribe_unconfirmed_transaction_func = {}
+        @ws.subscribe_recenttransactions_func = {}
+        @ws.subscribe_account_func = {}
       end
       
       def generate_sub_id
