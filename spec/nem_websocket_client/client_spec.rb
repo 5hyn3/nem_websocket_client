@@ -4,6 +4,8 @@ RSpec.describe NemWebsocketClient::Client do
   host = "http://23.228.67.85"
   port = 7778 
   test_address = "TBW4BPO7EDYFN3GDGFQW7DXTYNPCD4AKDJUU5PDC"
+  sub_test_address = "TAQSW32FHHWR3MAQYR6RVZL2IFGRPHBN5QKKUN7C"
+
   it "can connect" do
     EM::run{
       connected = false
@@ -100,6 +102,34 @@ RSpec.describe NemWebsocketClient::Client do
       end
       EM::add_timer 2 do
         expect(can_get_recenttransactions).to be true
+        EM.stop
+      end
+    }
+  end
+
+  it "get some account" do
+    EM::run{
+      can_get_test_address = false
+      can_get_sub_test_address = false
+
+
+      EM::add_timer 0 do
+        ws = NemWebsocketClient.connect(host,port)
+        ws.subscribe_account(test_address) do |account,address|
+          can_get_test_address = test_address == address
+        end
+
+        ws.subscribe_account(sub_test_address) do |account,address|
+          can_get_sub_test_address = sub_test_address == address
+        end
+
+        ws.request_account(test_address)
+        ws.request_account(sub_test_address)
+      end
+
+      EM::add_timer 2 do
+        expect(can_get_test_address).to be true
+        expect(can_get_sub_test_address).to be true
         EM.stop
       end
     }
