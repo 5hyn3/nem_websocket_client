@@ -42,7 +42,7 @@ RSpec.describe NemWebsocketClient::Client do
       can_get_owned_namespace = false
       EM::add_timer 0 do
         ws = NemWebsocketClient.connect(host,port)
-        ws.subscribe_owned_namespace(test_address) do |account,address|
+        ws.subscribe_owned_namespace(test_address) do |owned_namespace,address|
           can_get_owned_namespace = true
         end
         ws.request_owned_namespace(test_address)
@@ -59,7 +59,7 @@ RSpec.describe NemWebsocketClient::Client do
       can_get_owned_mosaic = false
       EM::add_timer 0 do
         ws = NemWebsocketClient.connect(host,port)
-        ws.subscribe_owned_mosaic(test_address) do |account,address|
+        ws.subscribe_owned_mosaic(test_address) do |owned_mosaic,address|
           can_get_owned_mosaic = true
         end
         ws.request_owned_mosaic(test_address)
@@ -76,7 +76,7 @@ RSpec.describe NemWebsocketClient::Client do
       can_get_owned_mosaic_definition = false
       EM::add_timer 0 do
         ws = NemWebsocketClient.connect(host,port)
-        ws.subscribe_owned_mosaic_definition(test_address) do |account,address|
+        ws.subscribe_owned_mosaic_definition(test_address) do |owned_mosaic_definition,address|
           can_get_owned_mosaic_definition = true
         end
         ws.request_owned_mosaic_definition(test_address)
@@ -93,7 +93,7 @@ RSpec.describe NemWebsocketClient::Client do
       can_get_recenttransactions = false
       EM::add_timer 0 do
         ws = NemWebsocketClient.connect(host,port)
-        ws.subscribe_recenttransactions(test_address) do |account,address|
+        ws.subscribe_recenttransactions(test_address) do |recenttransactions,address|
           can_get_recenttransactions = true
         end
         ws.request_recenttransactions(test_address)
